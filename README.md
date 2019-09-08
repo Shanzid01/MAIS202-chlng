@@ -17,6 +17,8 @@ The dropdown under each menu opens the option to choose a csv file from the loca
 
 Clicking the "Update Chart" button loads the given data and (if everything parses properly) refreshes the chart with the new data.
 
+Hovering over the bars on the chart will show details of the actual numeric figures represented by the bars.
+
 Alerts/messages explaining any error will be shown if a dataset fails to load properly at any stage.
 
 
