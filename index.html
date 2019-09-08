@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="shortcut icon" href="favicon.png" type="image/x-icon">
+    <title>MAIS 202</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.js"></script>
+    <script src="jquery-csv.js"></script>
+    <script src="helpers.js"></script>
+    <style>
+    .sidenav-trigger{
+        position: fixed;
+        top: 10px;
+        right: 20px;
+        opacity: 0.8;
+        transition: all ease-in 0.1s;
+    }
+    .sidenav-trigger:hover{
+        opacity: 1;
+    }
+    body, html{
+        overflow-y: hidden;
+    }
+    canvas{
+        position: fixed;
+        bottom: 0px;
+        left:0px;
+    }
+    .input-field{
+        padding: 0px 0.75rem;
+    }
+    .select-wrapper+label{
+        top:-36px;
+    }
+    #loader{
+        background:rgba(225,225,225,0.5);
+        text-align:center;
+        padding-top:40vh;
+        position: fixed;
+        top:0px;
+        left:0px;
+        width:100vw;
+        height:100vh;
+        z-index:1000;
+        display:block;
+    }
+    </style>
+    <script>
+        let homeOwnership;
+        let loans;
+        $(document).ready(async ()=>{
+            homeOwnership=await getData('home_ownership_data.csv');
+            loans=await getData('loan_data.csv');
+            showChart(processData());
+            $('.sidenav').sidenav({edge:'right'});
+            $('select').formSelect();
+        });
+
+        /**
+         * Function to get parsed data from CSV file into a JSON Object.
+         *
+         * @param {string}   fileName       The file name to be fetched.
+         *
+         * @return {Promise}                Promise which resolves to return array of objects containing parsed CSV.
+        */
+        function getData(fileName){
+            return new Promise((resolve, reject)=>{
+                $.ajax({
+                type: "GET",
+                url: fileName,
+                success: (data)=>{ 
+                    try{
+                        let CSVparsed=$.csv.toObjects(data);
+                        resolve(CSVparsed);
+                    }catch(err){
+                        M.toast({html: 'Error occurred in parsing given CSV file.'});
+                        reject(err);
+                    }
+                 },
+                 error: (err)=>{
+                    M.toast({html: 'Error: Could not load file.'});
+                    reject(err);
+                 }
+                });
+            });
+        }
+        
+        /**
+        * @return {Object} Object containing all processed data
+        */
+        function processData(){
+            //console.log(loans, homeOwnership);
+            loans.sort((a, b) => a.member_id.localeCompare(b.member_id)); //sort loans by member_id
+            homeOwnership.sort((a, b) => a.member_id.localeCompare(b.member_id)); //sort ownership data by member_id
+            //getting all unique values under home_ownership; this becomes the headers for chart
+            let types=homeOwnership.map((el)=> {return el.home_ownership}).filter((item, i, ar) => ar.indexOf(item) === i); //firstly isolates the column of home_ownership into single array, then filters array to extract the unique(distinct) values in column
+            let ownerData={}; //object to store all processed data
+            for(let i in types){
+                ownerData[types[i]]={total:0, count:0, average:0}; //initializes the headers with template object
+            }
+            for(let i=0; i<homeOwnership.length; i++){
+                if(homeOwnership[i]['member_id']==loans[i]["member_id"]){ //double checking if member_ids match -- they always should!
+                    let ownership=ownerData[homeOwnership[i]["home_ownership"]];
+                    ownership["total"]+=Number(loans[i]["loan_amnt"]); //adding loan amount to header total
+                    ownership["count"]++; //increase count by one
+                    ownership["average"]=(ownership["total"]/ownership["count"]).toFixed(6); //calculate new average
+                }else{
+                    M.toast({html: 'An unexpected error occurred while processing data, please try a different dataset.'});
+                    return null;
+                }
+            }
+            //console.log(ownerData);
+            return ({data:ownerData, headers:types});
+        }
+        let myChart;
+        function showChart(data){
+            if(!data){return;}
+            if(myChart){myChart.destroy();}
+            let ctx = document.getElementById('loanChart').getContext('2d');
+            let avgs=Object.keys(data['data']).map((key, index)=>{return {x:key, y:data['data'][key]['average']}});
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data['headers'],
+                    datasets: [{data:avgs, label:'Loan Data',backgroundColor: '#80D8FF',
+				borderColor: '#01579B',borderWidth: 1}]
+                },
+                options: {
+                    title:{
+                        display:true,
+                        text:'Average loan amounts per home ownership'
+                    },
+                    scales: {
+                        yAxes: [{
+                            scaleLabel :{display: true,labelString:'Average Loan Amount ($)'}
+                        }],
+                        xAxes: [{
+                            scaleLabel :{display: true,labelString:'Home ownership'}
+                        }]
+                    }
+                }
+                });
+                $('#loader').css('display', 'none');
+        }
+        async function UpdateChart(){
+            homeOwnership = $('#home_ownership_select').val()!=0? await loadLocalFile('home_ownership_file') : await getData('home_ownership_data.csv');
+            loans = $('#loan_select').val()!=0? await loadLocalFile('loan_data_file') : await getData('loan_data.csv');
+            showChart(processData());
+        }
+    </script>
+</head>
+<body>
+    <ul id="slide-out" class="sidenav">
+        <li><div class="user-view">
+          <h5>MAIS 202 Submission</h5>
+          Shanzid Shaiham
+        </div></li>
+        <li><div class="divider"></div></li>
+        <li style="height: 20px">&nbsp;</li>
+        <li>
+            <div class="input-field col s12">
+                <script type="text/javascript">
+                    function changeFuncHome(i) {
+                        if(i!=0){
+                            $('#home_ownership_file').click();
+                        }
+                    }
+                </script>
+                <select onchange="changeFuncHome(value)" id="home_ownership_select">
+                  <option value="0" selected>home_ownership_data.csv (remote)</option>
+                  <option value="1">Custom upload</option>
+                  <option value="2">Custom upload</option>
+                </select>
+                <label>Home Ownership source</label>
+            </div>
+            <input type="file" id="home_ownership_file" accept=".csv" style="display:none" />
+        </li>
+        <li>
+            <div class="input-field col s12">
+                <script type="text/javascript">
+                    function changeFuncLoan(i) {
+                        if(i!=0){
+                            $('#loan_data_file').click();
+                        }
+                    }
+                </script>
+                <select onchange="changeFuncLoan(value)" id="loan_select">
+                  <option value="0" selected>loan_data.csv (remote)</option>
+                  <option value="1">Custom upload</option>
+                  <option value="2">Custom upload</option>
+                </select>
+                <label>Loan Data source</label>
+              </div>
+              <input type="file" id="loan_data_file" accept=".csv" style="display:none" />
+        </li>
+        <li><div style="padding-left: 0.75rem;"><a class="waves-effect waves-light white-text teal btn-flat" onclick="UpdateChart()">Update chart</a></div></li>
+      </ul>
+      <div class="input-field col s12">
+      </div>
+      <a href="#" data-target="slide-out" class="sidenav-trigger btn-floating btn-large waves-effect waves-light red"><i class="material-icons">menu</i></a>
+      <canvas id="loanChart"></canvas>
+      <div id="loader">
+        <div class="preloader-wrapper big active">
+            <div class="spinner-layer spinner-blue-only">
+              <div class="circle-clipper left">
+                <div class="circle"></div>
+              </div><div class="gap-patch">
+                <div class="circle"></div>
+              </div><div class="circle-clipper right">
+                <div class="circle"></div>
+              </div>
+            </div>
+          </div>
+      </div>
+</body>
+</html>
