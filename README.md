@@ -3,7 +3,7 @@ Code challenge submission for MAIS202
 
 **<h2><b><a href="https://mais202-codechallenge.firebaseapp.com/" target="_blank">See live demo ↗</a></b></h2>**
 
-⚠⚠⚠ **THIS IS BUILT AS A WEBPAGE IN JAVASCRIPT<sub><sup> and HTML CSS ofcourse</sup></sub>, NOT PYTHON** ⚠⚠⚠
+⚠ **THIS IS BUILT AS A WEBPAGE IN JAVASCRIPT<sub><sup> and HTML CSS ofcourse</sup></sub>, NOT PYTHON**
 
 Reason why is explianed in FAQ section below. I hope that doesn't immediately disqualify the submission.🤞
 
