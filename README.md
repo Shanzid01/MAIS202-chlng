@@ -7,7 +7,7 @@ Code challenge submission for MAIS202
 
 Reason why is explianed in FAQ section below. I hope that doesn't immediately disqualify the submission.🤞
 
-## User manual
+## User manual 🧾
 The webpage initially loads data from the [two given datasets in the challenge repo](https://github.com/McGillAISociety/mais-202-coding-challenge-f2019).
 
 The page has a hamburger menu on the top-right corner which, when clicked, opens a sidenav that allows the user to load a local dataset.
@@ -22,7 +22,7 @@ Hovering over the bars on the chart will show details of the actual numeric figu
 Alerts/messages explaining any error will be shown if a dataset fails to load properly at any stage.
 
 
-## Under the hood
+## Under the hood 🛠
 * The web application is hosted in [Google Firebase](https://firebase.google.com/).
 * It uses Javascript and some jQuery for processing the data.
 * A library called [`jquery-csv.js`](https://github.com/typeiii/jquery-csv) is used for parsing the raw text data into a JSON object for both the datasets (no use reinventing the wheel eh?).
@@ -30,14 +30,14 @@ Alerts/messages explaining any error will be shown if a dataset fails to load pr
 The majority of the processing of the datasets to extract the relevant data are in the file [`/index.html`](https://github.com/Shanzid01/MAIS202-chlng/blob/master/index.html) from *line 55* to *line 120*.
 `//Comments` have been added for all the key steps in the processing stages.
 
-**External resources/libraries used**
+**External resources/libraries used** 🎈
 * [jquery-csv.js](https://github.com/typeiii/jquery-csv) - for parsing data from raw text to JSON Object
 * [Charts.js](https://www.chartjs.org/docs/latest/) - for taking the parsed data and displaying a bar chart
 * [MaterializeCSS](https://materializecss.com/) - for hamburger menu, sidenav, dropdown and button styling
 * [Google Firebase](https://firebase.google.com/) - for hosting and managing the website
 
 
-## FAQ
+## FAQ 🤔
 **Why did you code this in Javascript when the challenge clearly asked you to do it in Python?**
 
 My Javascript is significantly better than my skills in Python (which, frankly, is almost none). While I understand this is a limitation on my part, I am definitely willing to learn Python if required.
@@ -45,4 +45,4 @@ My Javascript is significantly better than my skills in Python (which, frankly, 
 If this project being coded in JS automatically disqualifies it from the entries then that's absolutely fine, I'll try again once I have Python under my belt. I had fun making this anyway! 😀
 
 
-*~Merci beaucoup*
+*~Merci beaucoup* 
